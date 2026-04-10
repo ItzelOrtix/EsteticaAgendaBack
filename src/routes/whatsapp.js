@@ -9,7 +9,9 @@ function twilioValidate(req, res, next) {
 
   const authToken = process.env.TWILIO_AUTH_TOKEN;
   const signature = req.headers['x-twilio-signature'];
-  const url = `${process.env.BACKEND_URL || 'http://localhost:4000'}/api/whatsapp/webhook`;
+  const proto = req.headers['x-forwarded-proto'] || req.protocol;
+  const host = req.headers['x-forwarded-host'] || req.headers.host;
+  const url = `${proto}://${host}${req.originalUrl}`;
 
   const valid = twilio.validateRequest(authToken, signature, url, req.body);
   if (!valid) {
