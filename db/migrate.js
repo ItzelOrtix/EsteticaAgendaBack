@@ -15,6 +15,17 @@ async function migrate() {
     await pool.query(sql);
     console.log('✅ Migración completada exitosamente');
 
+    // Eliminar servicios duplicados (dejar solo el más antiguo de cada nombre)
+    await pool.query(`
+      DELETE FROM services WHERE id NOT IN (
+        SELECT id FROM (
+          SELECT id, ROW_NUMBER() OVER (PARTITION BY name ORDER BY created_at ASC) AS rn
+          FROM services
+        ) t WHERE rn = 1
+      )
+    `);
+    console.log('✅ Duplicados de servicios eliminados');
+
     // Crear usuario admin por defecto si no existe
     const { rows } = await pool.query("SELECT id FROM users WHERE email = 'admin@estetica.com'");
     if (rows.length === 0) {
