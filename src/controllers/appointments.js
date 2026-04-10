@@ -1,5 +1,5 @@
 const pool = require('../config/database');
-const { addMinutes, parseISO, startOfDay, endOfDay, startOfWeek, endOfWeek } = require('date-fns');
+const { addMinutes, parseISO, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear } = require('date-fns');
 const { fromZonedTime } = require('date-fns-tz');
 const { sendBookingConfirmation } = require('../services/bot');
 
@@ -72,10 +72,16 @@ async function list(req, res) {
 
     if (view === 'week') {
       startRange = startOfWeek(baseDate, { weekStartsOn: 1 });
-      endRange = endOfWeek(baseDate, { weekStartsOn: 1 });
+      endRange   = endOfWeek(baseDate,   { weekStartsOn: 1 });
+    } else if (view === 'month') {
+      startRange = startOfMonth(baseDate);
+      endRange   = endOfMonth(baseDate);
+    } else if (view === 'year') {
+      startRange = startOfYear(baseDate);
+      endRange   = endOfYear(baseDate);
     } else {
       startRange = startOfDay(baseDate);
-      endRange = endOfDay(baseDate);
+      endRange   = endOfDay(baseDate);
     }
 
     const { rows } = await pool.query(
